@@ -1,0 +1,218 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 207 56% 92%;
+    --foreground: 240 60% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 60% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 60% 15%;
+    --primary: 240 100% 27%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 202 50% 85%;
+    --secondary-foreground: 240 60% 15%;
+    --muted: 202 50% 85%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 197 71% 73%;
+    --accent-foreground: 240 60% 15%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 197 40% 80%;
+    --input: 197 40% 80%;
+    --ring: 240 100% 27%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+    --sidebar-background: 207 56% 92%;
+    --sidebar-foreground: 240 60% 15%;
+    --sidebar-primary: 240 100% 27%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 197 71% 73%;
+    --sidebar-accent-foreground: 240 60% 15%;
+    --sidebar-border: 197 40% 80%;
+    --sidebar-ring: 240 100% 27%;
+  }
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 197 71% 73%;
+    --primary-foreground: 240 100% 27%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 197 71% 73%;
+    --accent-foreground: 240 100% 27%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 197 71% 73%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --sidebar-background: 240 10% 3.9%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 197 71% 73%;
+    --sidebar-primary-foreground: 240 100% 27%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 197 71% 73%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+
+/* =========================================================
+   ACCESIBILIDAD UNIVERSAL - CLASES GLOBALES
+   ========================================================= */
+
+/* 1. Contraste Alto */
+html.a11y-alto-contraste body,
+html.a11y-alto-contraste {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+html.a11y-alto-contraste *:not(#accessibility-panel):not(#accessibility-panel *) {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border-color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html.a11y-alto-contraste a {
+  color: #ffff00 !important;
+  text-decoration: underline !important;
+}
+
+html.a11y-alto-contraste button:not(#accessibility-btn):not(#accessibility-panel *),
+html.a11y-alto-contraste input,
+html.a11y-alto-contraste select,
+html.a11y-alto-contraste textarea {
+  border: 2px solid #ffffff !important;
+  background-color: #121212 !important;
+  color: #ffffff !important;
+}
+
+/* 2. Invertir Colores */
+html.a11y-invertir-colores {
+  filter: invert(100%) hue-rotate(180deg) !important;
+}
+
+html.a11y-invertir-colores img,
+html.a11y-invertir-colores video,
+html.a11y-invertir-colores picture,
+html.a11y-invertir-colores svg {
+  filter: invert(100%) hue-rotate(180deg) !important;
+}
+
+/* 3. Tamaño de Texto */
+html.a11y-texto-grande {
+  font-size: 118% !important;
+}
+
+html.a11y-texto-grande p,
+html.a11y-texto-grande span,
+html.a11y-texto-grande a,
+html.a11y-texto-grande li,
+html.a11y-texto-grande input,
+html.a11y-texto-grande select,
+html.a11y-texto-grande textarea,
+html.a11y-texto-grande button,
+html.a11y-texto-grande td,
+html.a11y-texto-grande th {
+  font-size: 1.15em !important;
+}
+
+html.a11y-texto-pequeno {
+  font-size: 88% !important;
+}
+
+html.a11y-texto-pequeno p,
+html.a11y-texto-pequeno span,
+html.a11y-texto-pequeno a,
+html.a11y-texto-pequeno li,
+html.a11y-texto-pequeno input,
+html.a11y-texto-pequeno select,
+html.a11y-texto-pequeno textarea,
+html.a11y-texto-pequeno button,
+html.a11y-texto-pequeno td,
+html.a11y-texto-pequeno th {
+  font-size: 0.9em !important;
+}
+
+/* 4. Espaciado Aumentado */
+html.a11y-espaciado-aumentado body,
+html.a11y-espaciado-aumentado p,
+html.a11y-espaciado-aumentado span,
+html.a11y-espaciado-aumentado a,
+html.a11y-espaciado-aumentado li,
+html.a11y-espaciado-aumentado h1,
+html.a11y-espaciado-aumentado h2,
+html.a11y-espaciado-aumentado h3 {
+  line-height: 2 !important;
+  letter-spacing: 0.08em !important;
+  word-spacing: 0.12em !important;
+}
+
+/* 5. Modo Lectura Limpia */
+html.a11y-modo-lectura body {
+  background-color: #f7f6f0 !important;
+  color: #1c1c1c !important;
+  font-family: Arial, "Helvetica Neue", sans-serif !important;
+}
+
+/* 6. Subrayar Enlaces */
+html.a11y-subrayar-enlaces a,
+html.a11y-subrayar-enlaces [role="link"] {
+  text-decoration: underline !important;
+  text-decoration-thickness: 3px !important;
+  text-underline-offset: 3px !important;
+  font-weight: 700 !important;
+}
+
+/* 7. Destacar Títulos */
+html.a11y-destacar-titulos h1,
+html.a11y-destacar-titulos h2,
+html.a11y-destacar-titulos h3,
+html.a11y-destacar-titulos h4,
+html.a11y-destacar-titulos h5,
+html.a11y-destacar-titulos h6 {
+  background-color: #fef08a !important;
+  color: #713f12 !important;
+  padding: 0.25rem 0.5rem !important;
+  border-left: 5px solid #ca8a04 !important;
+  border-radius: 4px !important;
+}
+
+/* 8. Cursor Grande */
+html.a11y-cursor-grande,
+html.a11y-cursor-grande *,
+html.a11y-cursor-grande button,
+html.a11y-cursor-grande a,
+html.a11y-cursor-grande input,
+html.a11y-cursor-grande select {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><polygon points="6,6 6,40 16,30 24,42 29,39 21,27 34,27" fill="%23000000" stroke="%23ffffff" stroke-width="2.5"/><circle cx="6" cy="6" r="3" fill="%23ffff00"/></svg>') 6 6, auto !important;
+}

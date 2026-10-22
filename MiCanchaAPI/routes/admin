@@ -1,0 +1,150 @@
+const express = require("express");
+const router = express.Router();
+
+const authMiddleware = require("../middlewares/authMiddleware");
+const adminMiddleware = require("../middlewares/adminMiddleware");
+const adminController = require("../controllers/adminController");
+
+router.use(authMiddleware, adminMiddleware);
+
+// =========================
+// DASHBOARD
+// =========================
+
+router.get("/dashboard", adminController.getDashboard);
+
+// =========================
+// RESERVAS
+// =========================
+
+router.get("/reservas", adminController.getReservas);
+
+router.patch(
+  "/reservas/:id/estado",
+  adminController.updateEstadoReserva
+);
+
+router.patch(
+  "/reservas/:id/pago-presencial",
+  adminController.confirmarPagoPresencial
+);
+
+// =========================
+// PAGOS
+// =========================
+
+router.get(
+  "/pagos/pendientes",
+  adminController.getPagosPendientes
+);
+
+router.patch(
+  "/pagos/:id/aprobar",
+  adminController.aprobarPago
+);
+
+router.patch(
+  "/pagos/:id/rechazar",
+  adminController.rechazarPago
+);
+
+// =========================
+// DEVOLUCIONES
+// =========================
+
+router.get(
+  "/devoluciones",
+  adminController.getDevoluciones
+);
+
+router.patch(
+  "/devoluciones/:id/revision",
+  adminController.pasarDevolucionRevision
+);
+
+router.patch(
+  "/devoluciones/:id/aprobar",
+  adminController.aprobarDevolucion
+);
+
+router.patch(
+  "/devoluciones/:id/rechazar",
+  adminController.rechazarDevolucion
+);
+
+router.patch(
+  "/devoluciones/:id/realizada",
+  adminController.marcarDevolucionRealizada
+);
+
+// =========================
+// USUARIOS
+// =========================
+
+router.get(
+  "/usuarios",
+  adminController.getUsuarios
+);
+
+router.patch(
+  "/usuarios/:id",
+  adminController.updateUsuario
+);
+
+// =========================
+// REPORTES
+// =========================
+
+router.get(
+  "/reportes/resumen",
+  adminController.getReportesResumen
+);
+
+// =========================
+// ADMINISTRADORES
+// =========================
+
+router.get(
+  "/administradores",
+  adminController.getAdministradores
+);
+
+router.post(
+  "/administradores",
+  adminController.createAdministrador
+);
+
+// =========================
+// CONFIGURACIÓN
+// =========================
+
+router.get(
+  "/configuracion",
+  adminController.getConfiguracion
+);
+
+router.put(
+  "/configuracion",
+  adminController.updateConfiguracion
+);
+
+// =========================
+// BLOQUEOS
+// =========================
+
+router.get(
+  "/bloqueos",
+  adminController.getBloqueosHorarios
+);
+
+router.post(
+  "/bloqueos",
+  adminController.createBloqueoHorario
+);
+
+router.patch(
+  "/bloqueos/:id/cancelar",
+  adminController.cancelarBloqueoHorario
+);
+
+module.exports = router;

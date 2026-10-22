@@ -1,0 +1,60 @@
+/**
+ * @fileoverview Firestore Security Rules for Prototyping.
+ *
+ * Core Philosophy:
+ * This ruleset prioritizes security by enforcing authentication for all write operations and implementing a public-read, owner-write access control pattern for the 'canchas' collection. Data shape validation is relaxed to allow rapid prototyping.
+ *
+ * Data Structure:
+ * - `/canchas/{canchaId}`: Represents individual soccer fields.
+ * - `/canchas/{canchaId}/horarios/{horarioId}`: Represents the availability schedule for each soccer field.
+ *
+ * Key Security Decisions:
+ * - All write operations require authentication (`isSignedIn()`).
+ * - 'canchas' are publicly readable, but only the owner (creator) can modify them. The assumption is made here that the cancha document has an ownerId (or creatorId) field.
+ * - Listing of canchas is publicly available.
+ * - 'horarios' are readable and writable only by authenticated users.
+ *
+ * Denormalization for Authorization:
+ * - It is assumed that a field ownerId or creatorId exists on the canchas documents.
+ *
+ * Structural Segregation:
+ * - No explicit segregation is implemented.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Allows public read access to canchas, but restricts modifications to the owner.
+     * @path /canchas/{canchaId}
+     * @allow (get, list): Any user can read the canchas.
+     * @allow (create): Only authenticated users can create canchas, and the cancha document must contain an 'ownerId' or 'creatorId' field.
+     * @allow (update, delete): Only the owner of the cancha can modify it.
+     * @deny  (create): If request.auth is null.
+     * @deny  (update, delete): If the user is not the owner or the document does not exist.
+     * @principle Allows public listing of canchas, but restricts modifications to the owner.
+     */
+    match /canchas/{canchaId} {
+      allow get, list: if true;
+      allow create: if isSignedIn() && (request.resource.data.ownerId == request.auth.uid || request.resource.data.creatorId == request.auth.uid);
+      allow update, delete: if isSignedIn() && (resource.data.ownerId == request.auth.uid || resource.data.creatorId == request.auth.uid);
+    }
+
+    /**
+     * @description Controls access to horarios, which are subcollections of canchas.
+     * @path /canchas/{canchaId}/horarios/{horarioId}
+     * @allow (get, list): Any authenticated user can read the horarios.
+     * @allow (create, update, delete): Only authenticated users can create, update, or delete horarios.
+     * @deny (create, update, delete): If request.auth is null.
+     * @principle Enforces authentication for all operations on horarios.
+     */
+    match /canchas/{canchaId}/horarios/{horarioId} {
+      allow get, list: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+  }
+}

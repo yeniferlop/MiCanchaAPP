@@ -1,0 +1,46 @@
+{
+  "placeholderImages": [
+    {
+      "id": "hero",
+      "description": "A dramatic shot of a football stadium at night under bright lights.",
+      "imageUrl": "https://images.unsplash.com/photo-1487466365202-1afdb86c764e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxmb290YmFsbCUyMHN0YWRpdW18ZW58MHx8fHwxNzYwOTUzMzEyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "football stadium"
+    },
+    {
+      "id": "pitch-1",
+      "description": "A lush green 5-a-side football pitch on a sunny day.",
+      "imageUrl": "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxmb290YmFsbCUyMHBpdGNofGVufDB8fHx8MTc2MDk2NzM0Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "football pitch"
+    },
+    {
+      "id": "pitch-2",
+      "description": "An indoor football pitch with artificial turf and bright lighting.",
+      "imageUrl": "https://images.unsplash.com/photo-1683438049760-6fab2112f25a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxpbmRvb3IlMjBmb290YmFsbHxlbnwwfHx8fDE3NjEwMDgxNTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "indoor football"
+    },
+    {
+      "id": "pitch-3",
+      "description": "A full-sized 11-a-side football field with white markings.",
+      "imageUrl": "https://images.unsplash.com/photo-1602432141202-e8b683524997?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxzb2NjZXIlMjBmaWVsZHxlbnwwfHx8fDE3NjA5Njk4Mjd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "soccer field"
+    },
+    {
+      "id": "pitch-4",
+      "description": "A community football pitch with goals at sunset.",
+      "imageUrl": "https://images.unsplash.com/photo-1697394048908-d1729723693f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxmb290YmFsbCUyMHN1bnNldHxlbnwwfHx8fDE3NjEwMDgxNTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "football sunset"
+    },
+    {
+      "id": "pitch-5",
+      "description": "Rooftop football pitch with a city view.",
+      "imageUrl": "https://images.unsplash.com/photo-1705336804280-fa82107b2b90?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxyb29mdG9wJTIwc29jY2VyfGVufDB8fHx8MTc2MTAwNjE1NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "rooftop soccer"
+    },
+    {
+      "id": "pitch-6",
+      "description": "A modern futsal court with blue flooring.",
+      "imageUrl": "https://images.unsplash.com/photo-1598026878267-1f22ae804eac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxmdXRzYWwlMjBjb3VydHxlbnwwfHx8fDE3NjEwMDY4NDJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "futsal court"
+    }
+  ]
+}

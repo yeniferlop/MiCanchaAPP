@@ -1,0 +1,42 @@
+﻿# Dependencias
+node_modules/
+.pnp.*
+.yarn/cache/
+
+# Next.js
+.next/
+out/
+
+# Compilaciones
+dist/
+build/
+coverage/
+
+# Variables de entorno y secretos
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Archivos temporales
+*.log
+*.tsbuildinfo
+.DS_Store
+
+# Configuraciones locales
+.vercel/
+.vs/
+.genkit/
+
+# Copias de seguridad
+_backups/
+
+# Respaldos de bases de datos
+**/backups/
+*.bak
+*.dump
+
+# Archivos de Windows
+desktop.ini
+Thumbs.db
