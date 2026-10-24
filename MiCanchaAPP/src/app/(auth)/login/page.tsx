@@ -174,6 +174,18 @@ export default function Login() {
             </a>
           )}
         </div>
+
+        {rol === "USUARIO" && (
+          <div className="mt-5 text-center">
+            <a
+              href="/reenviar-verificacion"
+              className="text-green-800 hover:text-green-950 font-semibold underline focus:outline-none focus:ring-2 focus:ring-green-600 rounded"
+            >
+              ¿No recibiste el correo de verificación?
+            </a>
+          </div>
+        )}
+
       </form>
     </main>
   );

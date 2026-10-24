@@ -489,3 +489,126 @@ exports.resetPassword = async (req, res) => {
     });
   }
 };
+
+exports.reenviarVerificacion = async (req, res) => {
+  const mensaje =
+    "Si existe una cuenta pendiente de verificacion, recibiras un nuevo enlace.";
+
+  const correo = String(req.body?.correo || "")
+    .trim()
+    .toLowerCase();
+
+  if (!EMAIL_REGEX.test(correo)) {
+    return res.status(400).json({
+      mensaje: "Ingresa un correo electronico valido.",
+    });
+  }
+
+  try {
+    const usuarios = await query(
+      `SELECT id_usuario, token_verificacion, token_verificacion_expira
+       FROM usuario
+       WHERE correo = ?
+         AND rol = 'usuario'
+         AND email_verificado = 0
+       LIMIT 1`,
+      [correo]
+    );
+
+    if (!usuarios.length) {
+      return res.json({ mensaje });
+    }
+
+    const rawToken = crypto.randomBytes(32).toString("hex");
+
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(rawToken)
+      .digest("hex");
+
+    // Limita el reenvio a una vez cada 5 minutos.
+    const resultado = await query(
+      `UPDATE usuario
+       SET token_verificacion = ?,
+           token_verificacion_expira =
+             DATE_ADD(NOW(), INTERVAL 24 HOUR)
+       WHERE id_usuario = ?
+         AND email_verificado = 0
+         AND (
+           token_verificacion_expira IS NULL
+           OR token_verificacion_expira <=
+              DATE_ADD(NOW(), INTERVAL 1435 MINUTE)
+         )`,
+      [tokenHash, usuarios[0].id_usuario]
+    );
+
+    if (!resultado.affectedRows) {
+      return res.json({ mensaje });
+    }
+
+    const verificationUrl = getVerificationUrl(rawToken);
+
+    try {
+      await getMailTransporter().sendMail({
+        from: `"Mi Cancha" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+        to: correo,
+        subject: "Verifica tu correo electronico - Mi Cancha",
+        text: `Verifica tu correo usando este enlace: ${verificationUrl}`,
+        html: `
+          <div style="font-family:Arial,sans-serif;padding:20px">
+            <h2>Verificacion de correo - Mi Cancha</h2>
+            <p>Solicitaste un nuevo enlace para verificar tu cuenta.</p>
+            <p>
+              <a href="${verificationUrl}">
+                Verificar mi correo
+              </a>
+            </p>
+            <p>El enlace tiene una vigencia de 24 horas.</p>
+            <p>Si no lo solicitaste, ignora este mensaje.</p>
+          </div>
+        `,
+      });
+   
+} catch (mailError) {
+  console.error(
+    "Error al reenviar verificacion:",
+    mailError.message || mailError
+  );
+
+  try {
+    await query(
+      `UPDATE usuario
+       SET token_verificacion = ?,
+           token_verificacion_expira = ?
+       WHERE id_usuario = ?
+         AND email_verificado = 0
+         AND token_verificacion = ?`,
+      [
+        usuarios[0].token_verificacion,
+        usuarios[0].token_verificacion_expira,
+        usuarios[0].id_usuario,
+        tokenHash,
+      ]
+    );
+  } catch (restauracionError) {
+    console.error(
+      "Error al restaurar token de verificacion:",
+      restauracionError.message || restauracionError
+    );
+  }
+}
+
+
+    return res.json({ mensaje });
+  } catch (error) {
+    console.error(
+      "Error en reenviarVerificacion:",
+      error.message || error
+    );
+
+    return res.status(500).json({
+      mensaje: "Error en el servidor.",
+    });
+  }
+};
+
