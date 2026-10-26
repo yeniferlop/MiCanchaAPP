@@ -171,7 +171,7 @@ export default function AdminConfiguracionPage() {
 
   return (
     <div>
-      <header className="flex items-start justify-between mb-8">
+      <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">
             Configuración del Sistema
@@ -295,7 +295,7 @@ export default function AdminConfiguracionPage() {
                 Días de funcionamiento
               </p>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {[
                   "Lunes",
                   "Martes",
@@ -529,7 +529,7 @@ export default function AdminConfiguracionPage() {
                     key={
                       admin.id_usuario
                     }
-                    className="border border-gray-100 rounded-xl p-4 flex items-center justify-between gap-4"
+                    className="border border-gray-100 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
                   >
                     <div>
                       <p className="font-semibold text-gray-800">

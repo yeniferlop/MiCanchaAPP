@@ -246,7 +246,7 @@ export default function AdminEducativoPage() {
             </Link>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="max-w-full overflow-x-auto overscroll-x-contain">
             <table className="w-full text-left border-collapse" aria-label="Tabla de contenidos educativos">
               <thead>
                 <tr className="bg-gray-100 border-b border-gray-200 text-xs font-bold text-gray-800 uppercase tracking-wider">

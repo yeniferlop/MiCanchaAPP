@@ -129,7 +129,7 @@ export default function AdminUsuariosPage() {
 
   return (
     <div>
-      <header className="flex items-start justify-between mb-8">
+      <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">
             Gestión de Usuarios
@@ -156,7 +156,7 @@ export default function AdminUsuariosPage() {
             Gestión de Usuarios
           </h2>
 
-          <div className="flex gap-3 flex-wrap items-center">
+          <div className="flex flex-wrap items-center gap-3">
             <label
               htmlFor="buscar-usuario-input"
               className="sr-only"
@@ -177,7 +177,7 @@ export default function AdminUsuariosPage() {
                   handleBuscar();
                 }
               }}
-              className="w-[280px] border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-green-700"
+              className="w-full sm:w-[280px] max-w-full border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-green-700"
             />
 
             <button
@@ -200,7 +200,7 @@ export default function AdminUsuariosPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="max-w-full overflow-x-auto overscroll-x-contain">
           {loading ? (
             <div
               className="py-10 text-center text-gray-700"

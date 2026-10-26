@@ -907,7 +907,7 @@ export default function AdminDevolucionesPage() {
           aria-modal="true"
           aria-labelledby="titulo-rechazo-devolucion"
         >
-          <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-xl">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 max-w-lg w-full max-h-[90dvh] overflow-y-auto shadow-xl">
             <h2
               id="titulo-rechazo-devolucion"
               className="text-2xl font-bold text-gray-900"
@@ -949,7 +949,7 @@ export default function AdminDevolucionesPage() {
               /500
             </p>
 
-            <div className="flex gap-3 mt-6">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 mt-6">
               <button
                 type="button"
                 onClick={
@@ -989,7 +989,7 @@ export default function AdminDevolucionesPage() {
           aria-modal="true"
           aria-labelledby="titulo-realizada-devolucion"
         >
-          <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-xl">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 max-w-lg w-full max-h-[90dvh] overflow-y-auto shadow-xl">
             <h2
               id="titulo-realizada-devolucion"
               className="text-2xl font-bold text-gray-900"
@@ -1039,7 +1039,7 @@ export default function AdminDevolucionesPage() {
               /500
             </p>
 
-            <div className="flex gap-3 mt-6">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 mt-6">
               <button
                 type="button"
                 onClick={

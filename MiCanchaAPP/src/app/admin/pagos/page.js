@@ -417,7 +417,7 @@ export default function AdminPagosPage() {
           </button>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="max-w-full overflow-x-auto overscroll-x-contain">
           {loading ? (
             <div
               className="py-10 text-center text-gray-700"
@@ -426,7 +426,7 @@ export default function AdminPagosPage() {
               Cargando pagos...
             </div>
           ) : (
-            <table className="w-full min-w-[1200px] border-collapse">
+            <table className="w-full min-w-[1000px] border-collapse">
               <thead>
                 <tr className="bg-gray-50 text-left">
                   <th
@@ -712,7 +712,7 @@ export default function AdminPagosPage() {
           aria-modal="true"
           aria-labelledby="titulo-rechazo"
         >
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+          <div className="w-full max-w-lg max-h-[90dvh] overflow-y-auto rounded-2xl bg-white p-4 sm:p-6 shadow-xl">
             <h2
               id="titulo-rechazo"
               className="text-xl font-bold text-gray-900"
