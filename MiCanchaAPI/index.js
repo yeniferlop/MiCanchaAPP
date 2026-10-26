@@ -8,11 +8,14 @@ const path = require("path");
 const app = express();
 
 // Direcciones autorizadas para acceder al backend
+
 const allowedOrigins = [
   "http://localhost:9002",
   "http://127.0.0.1:9002",
-  process.env.FRONTEND_URL
+  process.env.FRONTEND_URL,
+  "https://mi-cancha-app-git-prueba-responsive-admin-yeniferlop4-3883.vercel.app"
 ].filter(Boolean).map((origin) => origin.replace(/\/+$/, ""));
+
 
 app.use(
   cors({
