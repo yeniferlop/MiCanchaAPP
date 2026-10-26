@@ -516,7 +516,7 @@ export default function AdminReservasPage() {
 
           <div className="mb-6 border border-green-100 rounded-2xl p-5 bg-green-50">
 
-            <div className="flex items-center justify-between gap-3 mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
 
               <h3 className="text-lg font-semibold text-gray-800">Calendario de reservas</h3>
 
@@ -630,7 +630,7 @@ export default function AdminReservasPage() {
 
           <div className="mb-6 border border-red-100 rounded-2xl p-5 bg-red-50">
 
-            <div className="flex items-center justify-between gap-3 mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
 
               <h3 className="text-lg font-semibold text-gray-800">Bloquear horarios</h3>
 
@@ -908,7 +908,7 @@ export default function AdminReservasPage() {
 
         )}
 
-        <div className="overflow-x-auto">
+        <div className="max-w-full overflow-x-auto overscroll-x-contain">
 
           {loading ? (
 
@@ -916,7 +916,7 @@ export default function AdminReservasPage() {
 
           ) : (
 
-            <table className="w-full min-w-[1200px] border-collapse">
+            <table className="w-full min-w-[1000px] border-collapse">
 
               <thead>
 

@@ -114,7 +114,7 @@ export default function AdminReportesPage() {
     } catch (error) {
       setError(
         error.message ||
-          "Error cargando reportes"
+        "Error cargando reportes"
       );
     } finally {
       setLoading(false);
@@ -200,7 +200,7 @@ export default function AdminReportesPage() {
                 (row) =>
                   String(
                     row[
-                      header
+                    header
                     ] ?? ""
                   ).length
               )
@@ -245,7 +245,7 @@ export default function AdminReportesPage() {
               acc +
               Number(
                 item.total ||
-                  0
+                0
               ),
             0
           );
@@ -253,81 +253,81 @@ export default function AdminReportesPage() {
         const mesMayorReserva =
           data.reservasPorMes.length
             ? data.reservasPorMes.reduce(
-                (
-                  prev,
-                  current
-                ) =>
-                  Number(
-                    current.total ||
-                      0
-                  ) >
+              (
+                prev,
+                current
+              ) =>
+                Number(
+                  current.total ||
+                  0
+                ) >
                   Number(
                     prev.total ||
-                      0
+                    0
                   )
-                    ? current
-                    : prev
-              )
+                  ? current
+                  : prev
+            )
             : null;
 
         const mesMayorIngreso =
           data.ingresosMensuales.length
             ? data.ingresosMensuales.reduce(
-                (
-                  prev,
-                  current
-                ) =>
-                  Number(
-                    current.neto ||
-                      0
-                  ) >
+              (
+                prev,
+                current
+              ) =>
+                Number(
+                  current.neto ||
+                  0
+                ) >
                   Number(
                     prev.neto ||
-                      0
+                    0
                   )
-                    ? current
-                    : prev
-              )
+                  ? current
+                  : prev
+            )
             : null;
 
         const horarioPico =
           data.horariosMasDemandados.length
             ? data.horariosMasDemandados.reduce(
-                (
-                  prev,
-                  current
-                ) =>
-                  Number(
-                    current.total ||
-                      0
-                  ) >
+              (
+                prev,
+                current
+              ) =>
+                Number(
+                  current.total ||
+                  0
+                ) >
                   Number(
                     prev.total ||
-                      0
+                    0
                   )
-                    ? current
-                    : prev
-              )
+                  ? current
+                  : prev
+            )
             : null;
 
         const usuarioMasFrecuente =
           data.usuariosMasFrecuentes.length
             ? data.usuariosMasFrecuentes.reduce(
-                (
-                  prev,
-                  current
-                ) =>
-                  Number(
-                    current.total ||
-                      0
-                  ) >
+              (
+                prev,
+                current
+              ) =>
+                Number(
+                  current.total ||
+                  0
+                ) >
                   Number(
                     prev.total ||
-                      0
+                    0
                   )
-                    ? current
-                    : prev
-              )
+                  ? current
+                  : prev
+            )
             : null;
 
         // ==================================================
@@ -416,7 +416,7 @@ export default function AdminReportesPage() {
             Valor:
               Number(
                 mesMayorReserva?.total ||
-                  0
+                0
               ),
           },
 
@@ -434,7 +434,7 @@ export default function AdminReportesPage() {
             Valor:
               Number(
                 mesMayorIngreso?.neto ||
-                  0
+                0
               ),
           },
 
@@ -452,7 +452,7 @@ export default function AdminReportesPage() {
             Valor:
               Number(
                 horarioPico?.total ||
-                  0
+                0
               ),
           },
 
@@ -470,7 +470,7 @@ export default function AdminReportesPage() {
             Valor:
               Number(
                 usuarioMasFrecuente?.total ||
-                  0
+                0
               ),
           },
         ];
@@ -482,26 +482,26 @@ export default function AdminReportesPage() {
         const reservasPorMesData =
           data.reservasPorMes.length
             ? data.reservasPorMes.map(
-                (item) => ({
-                  Mes:
-                    item.mes,
+              (item) => ({
+                Mes:
+                  item.mes,
 
-                  "Total Reservas":
-                    Number(
-                      item.total ||
-                        0
-                    ),
-                })
-              )
+                "Total Reservas":
+                  Number(
+                    item.total ||
+                    0
+                  ),
+              })
+            )
             : [
-                {
-                  Mes:
-                    "Sin datos",
+              {
+                Mes:
+                  "Sin datos",
 
-                  "Total Reservas":
-                    0,
-                },
-              ];
+                "Total Reservas":
+                  0,
+              },
+            ];
 
         // ==================================================
         // INGRESOS MENSUALES
@@ -510,110 +510,110 @@ export default function AdminReportesPage() {
         const ingresosMensualesData =
           data.ingresosMensuales.length
             ? data.ingresosMensuales.map(
-                (item) => ({
-                  Mes:
-                    item.mes,
+              (item) => ({
+                Mes:
+                  item.mes,
 
-                  "Pago Presencial":
-                    Number(
-                      item.presencial ||
-                        0
-                    ),
+                "Pago Presencial":
+                  Number(
+                    item.presencial ||
+                    0
+                  ),
 
-                  "Cuenta Institucional":
-                    Number(
-                      item.comprobante ||
-                        0
-                    ),
+                "Cuenta Institucional":
+                  Number(
+                    item.comprobante ||
+                    0
+                  ),
 
-                  "Ingresos Brutos":
-                    Number(
-                      item.total ||
-                        0
-                    ),
+                "Ingresos Brutos":
+                  Number(
+                    item.total ||
+                    0
+                  ),
 
-                  "Devoluciones Realizadas":
-                    Number(
-                      item.devoluciones ||
-                        0
-                    ),
+                "Devoluciones Realizadas":
+                  Number(
+                    item.devoluciones ||
+                    0
+                  ),
 
-                  "Ingresos Netos":
-                    Number(
-                      item.neto ||
-                        0
-                    ),
-                })
-              )
+                "Ingresos Netos":
+                  Number(
+                    item.neto ||
+                    0
+                  ),
+              })
+            )
             : [
-                {
-                  Mes:
-                    "Sin datos",
+              {
+                Mes:
+                  "Sin datos",
 
-                  "Pago Presencial":
-                    0,
+                "Pago Presencial":
+                  0,
 
-                  "Cuenta Institucional":
-                    0,
+                "Cuenta Institucional":
+                  0,
 
-                  "Ingresos Brutos":
-                    0,
+                "Ingresos Brutos":
+                  0,
 
-                  "Devoluciones Realizadas":
-                    0,
+                "Devoluciones Realizadas":
+                  0,
 
-                  "Ingresos Netos":
-                    0,
-                },
-              ];
+                "Ingresos Netos":
+                  0,
+              },
+            ];
 
         const horariosMasDemandadosData =
           data.horariosMasDemandados.length
             ? data.horariosMasDemandados.map(
-                (item) => ({
-                  Hora:
-                    item.hora,
+              (item) => ({
+                Hora:
+                  item.hora,
 
-                  "Total Reservas":
-                    Number(
-                      item.total ||
-                        0
-                    ),
-                })
-              )
+                "Total Reservas":
+                  Number(
+                    item.total ||
+                    0
+                  ),
+              })
+            )
             : [
-                {
-                  Hora:
-                    "Sin datos",
+              {
+                Hora:
+                  "Sin datos",
 
-                  "Total Reservas":
-                    0,
-                },
-              ];
+                "Total Reservas":
+                  0,
+              },
+            ];
 
         const usuariosMasFrecuentesData =
           data.usuariosMasFrecuentes.length
             ? data.usuariosMasFrecuentes.map(
-                (item) => ({
-                  Usuario:
-                    item.nombre,
+              (item) => ({
+                Usuario:
+                  item.nombre,
 
-                  "Total Reservas":
-                    Number(
-                      item.total ||
-                        0
-                    ),
-                })
-              )
+                "Total Reservas":
+                  Number(
+                    item.total ||
+                    0
+                  ),
+              })
+            )
             : [
-                {
-                  Usuario:
-                    "Sin datos",
+              {
+                Usuario:
+                  "Sin datos",
 
-                  "Total Reservas":
-                    0,
-                },
-              ];
+                "Total Reservas":
+                  0,
+              },
+            ];
 
         const estadisticasGeneralesData =
           [
@@ -626,7 +626,7 @@ export default function AdminReportesPage() {
                   data
                     .estadisticasGenerales
                     .ocupacionPromedio ||
-                    0
+                  0
                 )}%`,
             },
 
@@ -639,7 +639,7 @@ export default function AdminReportesPage() {
                   data
                     .estadisticasGenerales
                     .cancelaciones ||
-                    0
+                  0
                 )}%`,
             },
 
@@ -652,7 +652,7 @@ export default function AdminReportesPage() {
                   data
                     .estadisticasGenerales
                     .pagosATiempo ||
-                    0
+                  0
                 )}%`,
             },
 
@@ -665,7 +665,7 @@ export default function AdminReportesPage() {
                   data
                     .estadisticasGenerales
                     .satisfaccion ||
-                    0
+                  0
                 )}/5`,
             },
           ];
@@ -827,7 +827,9 @@ export default function AdminReportesPage() {
           </p>
         </div>
 
-        <div className="flex gap-3">
+
+        <div className="grid w-full grid-cols-1 gap-3 sm:w-auto sm:grid-cols-2">
+
           <button
             type="button"
             onClick={
@@ -960,7 +962,7 @@ export default function AdminReportesPage() {
                 Reservas por Mes
               </h2>
 
-              <div className="h-[280px] flex items-end justify-between gap-3">
+              <div className="h-[280px] min-w-0 flex items-end justify-between gap-1 sm:gap-3">
                 {data.reservasPorMes.map(
                   (
                     item,
@@ -971,11 +973,11 @@ export default function AdminReportesPage() {
                         (
                           Number(
                             item.total ||
-                              0
+                            0
                           ) /
                           maxReservas
                         ) *
-                          220,
+                        220,
                         8
                       );
 
@@ -984,7 +986,7 @@ export default function AdminReportesPage() {
                         key={
                           index
                         }
-                        className="flex flex-col items-center flex-1"
+                        className="flex min-w-0 flex-col items-center flex-1"
                       >
                         <div
                           className="w-full max-w-[28px] bg-blue-500 rounded-t-md"
@@ -1016,7 +1018,7 @@ export default function AdminReportesPage() {
                 Ingresos brutos menos devoluciones realizadas.
               </p>
 
-              <div className="h-[280px] flex items-end justify-between gap-3">
+              <div className="h-[280px] min-w-0 flex items-end justify-between gap-1 sm:gap-3">
                 {data.ingresosMensuales.map(
                   (
                     item,
@@ -1025,7 +1027,7 @@ export default function AdminReportesPage() {
                     const valorNeto =
                       Number(
                         item.neto ||
-                          0
+                        0
                       );
 
                     const height =
@@ -1037,7 +1039,7 @@ export default function AdminReportesPage() {
                           ) /
                           maxIngresos
                         ) *
-                          220,
+                        220,
                         8
                       );
 
@@ -1046,7 +1048,7 @@ export default function AdminReportesPage() {
                         key={
                           index
                         }
-                        className="flex flex-col items-center flex-1"
+                        className="flex min-w-0 flex-col items-center flex-1"
                       >
                         <div
                           className="w-full max-w-[28px] bg-green-500 rounded-t-md"
@@ -1090,7 +1092,7 @@ export default function AdminReportesPage() {
               Detalle económico mensual
             </h2>
 
-            <div className="overflow-x-auto">
+            <div className="max-w-full overflow-x-auto overscroll-x-contain">
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="border-b border-gray-200">
@@ -1159,15 +1161,15 @@ export default function AdminReportesPage() {
                         <td className="p-3 text-right text-red-700 font-semibold">
                           {Number(
                             item.devoluciones ||
-                              0
+                            0
                           ) >
-                          0
+                            0
                             ? `-${formatMoney(
-                                item.devoluciones
-                              )}`
+                              item.devoluciones
+                            )}`
                             : formatMoney(
-                                0
-                              )}
+                              0
+                            )}
                         </td>
 
                         <td className="p-3 text-right text-green-800 font-bold">

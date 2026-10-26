@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -21,6 +22,7 @@ export default function AdminLayout({ children }) {
 
   const [loading, setLoading] = useState(true);
   const [nombre, setNombre] = useState("Administrador");
+  const [menuAbierto, setMenuAbierto] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -55,11 +57,16 @@ export default function AdminLayout({ children }) {
     }
   }, [router]);
 
+  useEffect(() => {
+    setMenuAbierto(false);
+  }, [pathname]);
+
   const cerrarSesion = () => {
     adminLogout();
   };
 
   const irA = (path) => {
+    setMenuAbierto(false);
     router.push(path);
   };
 
@@ -70,6 +77,27 @@ export default function AdminLayout({ children }) {
 
     return pathname?.startsWith(path);
   };
+
+  const renderOpciones = () => (
+    <ul className="space-y-2">
+      {menuItems.map((item) => (
+        <li key={item.path}>
+          <button
+            type="button"
+            onClick={() => irA(item.path)}
+            aria-current={isActive(item.path) ? "page" : undefined}
+            className={`w-full min-h-11 text-left rounded-lg px-4 py-3 transition focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 ${
+              isActive(item.path)
+                ? "bg-green-50 text-green-900 font-semibold border-l-4 border-green-600"
+                : "text-gray-700 hover:bg-gray-100 hover:text-gray-900 font-medium"
+            }`}
+          >
+            {item.label}
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
 
   if (loading) {
     return (
@@ -82,14 +110,64 @@ export default function AdminLayout({ children }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f6f8] flex">
-      <aside className="w-[250px] bg-white border-r border-gray-200 flex flex-col justify-between">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#f5f6f8]">
+
+      {/* ENCABEZADO PARA CELULARES */}
+      <header className="md:hidden sticky top-0 z-40 bg-white border-b border-gray-200">
+        <div className="flex items-center justify-between gap-2 px-3 py-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <img
+              src="/logo_alcaldia.jpg"
+              alt="Escudo de la Alcaldía de Bolívar"
+              className="w-9 h-9 shrink-0 object-contain"
+            />
+
+            <span className="font-bold text-gray-900 text-sm truncate">
+              Panel Admin
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => setMenuAbierto(!menuAbierto)}
+              aria-expanded={menuAbierto}
+              aria-controls="menu-admin-movil"
+              className="min-h-11 px-3 rounded-lg bg-green-700 text-white font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2"
+            >
+              {menuAbierto ? "Cerrar" : "☰ Menú"}
+            </button>
+
+            <button
+              type="button"
+              onClick={cerrarSesion}
+              aria-label="Cerrar sesión de administrador"
+              className="min-h-11 px-3 rounded-lg border border-red-200 text-red-700 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            >
+              Salir
+            </button>
+          </div>
+        </div>
+
+        <nav
+          id="menu-admin-movil"
+          aria-label="Navegación administrativa móvil"
+          className={`${
+            menuAbierto ? "block" : "hidden"
+          } border-t border-gray-200 p-3 max-h-[70dvh] overflow-y-auto`}
+        >
+          {renderOpciones()}
+        </nav>
+      </header>
+
+      {/* MENÚ LATERAL PARA COMPUTADOR */}
+      <aside className="hidden md:flex md:w-[220px] lg:w-[250px] md:shrink-0 bg-white border-r border-gray-200 flex-col justify-between min-h-screen">
         <div>
           <div className="p-6 border-b border-gray-100">
             <div className="flex items-center gap-3">
               <img
                 src="/logo_alcaldia.jpg"
-                alt="Logo Alcaldía"
+                alt="Escudo de la Alcaldía de Bolívar"
                 className="w-10 h-10 object-contain"
               />
 
@@ -113,28 +191,7 @@ export default function AdminLayout({ children }) {
               Gestión
             </p>
 
-            <ul className="space-y-2" role="list">
-              {menuItems.map((item) => (
-                <li key={item.path}>
-                  <button
-                    type="button"
-                    onClick={() => irA(item.path)}
-                    aria-current={
-                      isActive(item.path)
-                        ? "page"
-                        : undefined
-                    }
-                    className={`w-full text-left rounded-lg px-4 py-3 transition focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 ${
-                      isActive(item.path)
-                        ? "bg-green-50 text-green-900 font-semibold border-l-4 border-green-600"
-                        : "text-gray-700 hover:bg-gray-100 hover:text-gray-900 font-medium"
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
+            {renderOpciones()}
           </nav>
         </div>
 
@@ -144,7 +201,7 @@ export default function AdminLayout({ children }) {
               Administrador
             </p>
 
-            <p className="font-semibold text-gray-800">
+            <p className="font-semibold text-gray-800 break-words">
               {nombre}
             </p>
           </div>
@@ -160,7 +217,8 @@ export default function AdminLayout({ children }) {
         </div>
       </aside>
 
-      <main className="flex-1 p-8">
+      {/* CONTENIDO PRINCIPAL */}
+      <main className="w-full min-w-0 flex-1 overflow-x-hidden p-3 sm:p-5 lg:p-8">
         {children}
       </main>
     </div>

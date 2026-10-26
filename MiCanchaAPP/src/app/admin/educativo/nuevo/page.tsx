@@ -68,7 +68,7 @@ export default function NuevoContenidoEducativoPage() {
 
   return (
     <section aria-labelledby="heading-nuevo-educativo" className="max-w-4xl mx-auto space-y-6">
-      <header className="flex items-center justify-between bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm">
         <div>
           <h1 id="heading-nuevo-educativo" className="text-2xl font-bold text-gray-900">
             Crear Nuevo Contenido Educativo
@@ -187,7 +187,7 @@ export default function NuevoContenidoEducativoPage() {
             </label>
           </div>
 
-          <div className="flex items-center justify-end gap-4 pt-4 border-t border-gray-200">
+          <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 pt-4 border-t border-gray-200">
             <Link
               href="/admin/educativo"
               className="px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition focus:outline-none focus:ring-2 focus:ring-gray-400"
