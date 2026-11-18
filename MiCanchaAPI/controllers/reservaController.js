@@ -122,6 +122,22 @@ function obtenerFechaHoraColombia(fechaReferencia = new Date()) {
   };
 }
 
+function normalizarHora(hora) {
+  if (!hora) return null;
+
+  const value = String(hora).trim();
+
+  if (/^\d{2}:\d{2}:\d{2}$/.test(value)) {
+    return value;
+  }
+
+  if (/^\d{2}:\d{2}$/.test(value)) {
+    return `${value}:00`;
+  }
+
+  return value;
+}
+
 // ======================================================
 // CREAR RESERVA
 // ======================================================
