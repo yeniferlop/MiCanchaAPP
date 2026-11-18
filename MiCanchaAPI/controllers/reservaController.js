@@ -1,4 +1,5 @@
 const db = require("../db");
+const dbPool = require("../dbPool");
 const nodemailer = require("nodemailer");
 require("dotenv").config();
 
@@ -119,15 +120,13 @@ function normalizarHora(hora) {
 // CREAR RESERVA
 // ======================================================
 
-exports.crearReserva = (req, res) => {
+exports.crearReserva = async (req, res) => {
   const {
     fecha,
     hora_inicio,
     hora_fin,
     id_usuario,
-    total,
   } = req.body;
-
 
   const idUsuarioAutenticado = Number(req.user?.id_usuario);
   const idUsuarioReserva = Number(id_usuario);
@@ -156,22 +155,23 @@ exports.crearReserva = (req, res) => {
     });
   }
 
-  if (
-    !fecha ||
-    !hora_inicio ||
-    !hora_fin ||
-    !id_usuario
-  ) {
+  if (!fecha || !hora_inicio || !hora_fin || !id_usuario) {
     return res.status(400).json({
       mensaje: "Todos los campos son obligatorios",
     });
   }
 
-  const horaInicioFinal =
-    normalizarHora(hora_inicio);
+  // La fecha se normaliza para que todas las solicitudes del mismo día
+  // utilicen el mismo bloqueo de concurrencia.
+  const fechaReserva = String(fecha).trim().slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaReserva)) {
+    return res.status(400).json({
+      mensaje: "La fecha no tiene un formato válido",
+    });
+  }
 
-  const horaFinFinal =
-    normalizarHora(hora_fin);
+  const horaInicioFinal = normalizarHora(hora_inicio);
+  const horaFinFinal = normalizarHora(hora_fin);
 
   if (!horaInicioFinal || !horaFinFinal) {
     return res.status(400).json({
@@ -181,17 +181,13 @@ exports.crearReserva = (req, res) => {
 
   if (horaInicioFinal >= horaFinFinal) {
     return res.status(400).json({
-      mensaje:
-        "La hora final debe ser mayor a la hora inicial",
+      mensaje: "La hora final debe ser mayor a la hora inicial",
     });
   }
 
-
-  // Calcular el valor de la reserva en el servidor.
-  // Tarifa actual: $15.000 COP por hora.
-
+  // La tarifa se calcula en el servidor; no se confía en el total enviado
+  // por el cliente.
   const TARIFA_POR_HORA = 15000;
-
   const formatoHora = /^([01]\d|2[0-3]):[0-5]\d:00$/;
 
   if (
@@ -203,21 +199,13 @@ exports.crearReserva = (req, res) => {
     });
   }
 
-  const [horaInicio, minutoInicio] =
-    horaInicioFinal.split(":").map(Number);
-
-  const [horaFin, minutoFin] =
-    horaFinFinal.split(":").map(Number);
-
+  const [horaInicio, minutoInicio] = horaInicioFinal.split(":").map(Number);
+  const [horaFin, minutoFin] = horaFinFinal.split(":").map(Number);
   const minutosInicio = horaInicio * 60 + minutoInicio;
   const minutosFin = horaFin * 60 + minutoFin;
-
   const duracionMinutos = minutosFin - minutosInicio;
 
-  if (
-    duracionMinutos <= 0 ||
-    duracionMinutos % 60 !== 0
-  ) {
+  if (duracionMinutos <= 0 || duracionMinutos % 60 !== 0) {
     return res.status(400).json({
       mensaje: "La reserva debe realizarse por horas completas",
     });
@@ -226,134 +214,144 @@ exports.crearReserva = (req, res) => {
   const horasReservadas = duracionMinutos / 60;
   const totalCalculado = horasReservadas * TARIFA_POR_HORA;
 
+  // GET_LOCK es un bloqueo asesorado de MySQL. Se obtiene en una conexión
+  // dedicada del pool y se conserva durante la validación y el INSERT.
+  // Así, dos solicitudes para la misma fecha no pueden validar a la vez.
+  const nombreBloqueo = `micancha_reserva_${fechaReserva}`;
+  let connection;
+  let bloqueoAdquirido = false;
+  let transaccionIniciada = false;
+  let conexionReutilizable = true;
 
-  const sqlVerificarBloqueo = `
-    SELECT id_bloqueo
-    FROM bloqueo_horario
-    WHERE fecha = ?
-      AND estado = 'activo'
-      AND (? < hora_fin AND ? > hora_inicio)
-    LIMIT 1
-  `;
+  try {
+    connection = await dbPool.getConnection();
 
-  db.query(
-    sqlVerificarBloqueo,
-    [
-      fecha,
-      horaInicioFinal,
-      horaFinFinal,
-    ],
-    (errorBloqueo, bloqueos) => {
-      if (errorBloqueo) {
-        return res.status(500).json({
-          mensaje:
-            "Error al verificar bloqueos",
-          error: errorBloqueo,
-        });
-      }
+    const [resultadoBloqueo] = await connection.query(
+      "SELECT GET_LOCK(?, 15) AS adquirido",
+      [nombreBloqueo]
+    );
 
-      if (bloqueos.length > 0) {
-        return res.status(409).json({
-          mensaje:
-            "Ese horario está bloqueado por la administración",
-        });
-      }
+    if (Number(resultadoBloqueo[0]?.adquirido) !== 1) {
+      return res.status(503).json({
+        mensaje:
+          "No fue posible procesar la reserva porque hay otra solicitud en curso. Intenta nuevamente.",
+      });
+    }
 
-      const sqlVerificarReserva = `
+    bloqueoAdquirido = true;
+    await connection.beginTransaction();
+    transaccionIniciada = true;
+
+    const [bloqueos] = await connection.query(
+      `
+        SELECT id_bloqueo
+        FROM bloqueo_horario
+        WHERE fecha = ?
+          AND estado = 'activo'
+          AND (? < hora_fin AND ? > hora_inicio)
+        LIMIT 1
+      `,
+      [fechaReserva, horaInicioFinal, horaFinFinal]
+    );
+
+    if (bloqueos.length > 0) {
+      await connection.rollback();
+      transaccionIniciada = false;
+      return res.status(409).json({
+        mensaje: "Ese horario está bloqueado por la administración",
+      });
+    }
+
+    // La disponibilidad se consulta nuevamente dentro de la sección
+    // protegida por el bloqueo, justo antes de insertar la reserva.
+    const [reservasExistentes] = await connection.query(
+      `
         SELECT id_reserva
         FROM reserva
         WHERE fecha = ?
           AND estado IN ('pendiente', 'confirmada')
           AND (? < hora_fin AND ? > hora_inicio)
         LIMIT 1
-      `;
+      `,
+      [fechaReserva, horaInicioFinal, horaFinFinal]
+    );
 
-      db.query(
-        sqlVerificarReserva,
-        [
-          fecha,
-          horaInicioFinal,
-          horaFinFinal,
-        ],
-        (
-          errorReserva,
-          resultados
-        ) => {
-          if (errorReserva) {
-            return res.status(500).json({
-              mensaje:
-                "Error al verificar disponibilidad",
-              error: errorReserva,
-            });
-          }
-
-          if (resultados.length > 0) {
-            return res.status(409).json({
-              mensaje:
-                "Ese horario ya está ocupado",
-            });
-          }
-
-          const sqlInsertar = `
-            INSERT INTO reserva (
-              fecha,
-              hora_inicio,
-              hora_fin,
-              estado,
-              id_usuario,
-              total,
-              metodo_pago,
-              estado_pago,
-              comprobante
-            )
-            VALUES (
-              ?,
-              ?,
-              ?,
-              'pendiente',
-              ?,
-              ?,
-              NULL,
-              'pendiente',
-              NULL
-            )
-          `;
-
-          db.query(
-            sqlInsertar,
-
-            [
-              fecha,
-              horaInicioFinal,
-              horaFinFinal,
-              id_usuario,
-              totalCalculado,
-            ]
-            ,
-            (
-              errorInsert,
-              result
-            ) => {
-              if (errorInsert) {
-                return res.status(500).json({
-                  mensaje:
-                    "Error al crear la reserva",
-                  error: errorInsert,
-                });
-              }
-
-              return res.json({
-                mensaje:
-                  "Reserva creada correctamente",
-                id_reserva:
-                  result.insertId,
-              });
-            }
-          );
-        }
-      );
+    if (reservasExistentes.length > 0) {
+      await connection.rollback();
+      transaccionIniciada = false;
+      return res.status(409).json({
+        mensaje: "Ese horario ya está ocupado",
+      });
     }
-  );
+
+    const [resultadoInsert] = await connection.query(
+      `
+        INSERT INTO reserva (
+          fecha,
+          hora_inicio,
+          hora_fin,
+          estado,
+          id_usuario,
+          total,
+          metodo_pago,
+          estado_pago,
+          comprobante
+        )
+        VALUES (?, ?, ?, 'pendiente', ?, ?, NULL, 'pendiente', NULL)
+      `,
+      [
+        fechaReserva,
+        horaInicioFinal,
+        horaFinFinal,
+        idUsuarioReserva,
+        totalCalculado,
+      ]
+    );
+
+    await connection.commit();
+    transaccionIniciada = false;
+
+    return res.json({
+      mensaje: "Reserva creada correctamente",
+      id_reserva: resultadoInsert.insertId,
+    });
+  } catch (error) {
+    if (connection && transaccionIniciada) {
+      try {
+        await connection.rollback();
+      } catch (errorRollback) {
+        conexionReutilizable = false;
+        console.error("Error al revertir la transacción de reserva:", errorRollback);
+      }
+    }
+
+    console.error("Error al crear la reserva:", error);
+    return res.status(500).json({
+      mensaje: "Error al crear la reserva",
+    });
+  } finally {
+    if (connection) {
+      if (bloqueoAdquirido) {
+        try {
+          await connection.query(
+            "SELECT RELEASE_LOCK(?) AS liberado",
+            [nombreBloqueo]
+          );
+        } catch (errorLiberacion) {
+          conexionReutilizable = false;
+          console.error("Error al liberar el bloqueo de reserva:", errorLiberacion);
+        }
+      }
+
+      // Si no se pudo revertir o liberar correctamente, se destruye la
+      // conexión para que no vuelva al pool con una transacción o bloqueo activo.
+      if (conexionReutilizable) {
+        connection.release();
+      } else {
+        connection.destroy();
+      }
+    }
+  }
 };
 
 // ======================================================
