@@ -100,20 +100,26 @@ Ingresa al panel administrador de MiCancha para revisarla.
   });
 }
 
-function normalizarHora(hora) {
-  if (!hora) return null;
+function obtenerFechaHoraColombia(fechaReferencia = new Date()) {
+  const partes = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Bogota",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(fechaReferencia);
 
-  const value = String(hora).trim();
+  const valores = Object.fromEntries(
+    partes.map(({ type, value }) => [type, value])
+  );
 
-  if (/^\d{2}:\d{2}:\d{2}$/.test(value)) {
-    return value;
-  }
-
-  if (/^\d{2}:\d{2}$/.test(value)) {
-    return `${value}:00`;
-  }
-
-  return value;
+  return {
+    fecha: `${valores.year}-${valores.month}-${valores.day}`,
+    minutos: Number(valores.hour) * 60 + Number(valores.minute),
+  };
 }
 
 // ======================================================
@@ -203,6 +209,26 @@ exports.crearReserva = async (req, res) => {
   const [horaFin, minutoFin] = horaFinFinal.split(":").map(Number);
   const minutosInicio = horaInicio * 60 + minutoInicio;
   const minutosFin = horaFin * 60 + minutoFin;
+    // Validar que la fecha y hora de la reserva no hayan pasado.
+  // Se utiliza la zona horaria de Colombia.
+  const ahoraColombia = obtenerFechaHoraColombia();
+
+  // Impedir reservas en fechas anteriores al día actual.
+  if (fechaReserva < ahoraColombia.fecha) {
+    return res.status(400).json({
+      mensaje: "No puedes reservar una fecha que ya pasó",
+    });
+  }
+
+  // Impedir reservas en horarios que ya comenzaron o pasaron.
+  if (
+    fechaReserva === ahoraColombia.fecha &&
+    minutosInicio <= ahoraColombia.minutos
+  ) {
+    return res.status(400).json({
+      mensaje: "No puedes reservar un horario que ya comenzó o ya pasó",
+    });
+  }
   const duracionMinutos = minutosFin - minutosInicio;
 
   if (duracionMinutos <= 0 || duracionMinutos % 60 !== 0) {
