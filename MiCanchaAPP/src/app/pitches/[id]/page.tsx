@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 
-export default function PitchDetailPage({ params }: { params: { id: string } }) {
+export default function PitchDetailPage() {
+  const params = useParams<{ id: string }>();
   const [cancha, setCancha] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [usuario, setUsuario] = useState<any>(null);
