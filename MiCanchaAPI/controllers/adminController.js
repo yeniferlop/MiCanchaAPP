@@ -63,8 +63,13 @@ async function query(sql, params = []) {
 }
 
 
+
 async function reportQuery(sql, params = []) {
-  const [rows] = await reportPool.promise().query(sql, params);
+  const pool = typeof reportPool.promise === "function"
+    ? reportPool.promise()
+    : reportPool;
+
+  const [rows] = await pool.query(sql, params);
   return rows;
 }
 
