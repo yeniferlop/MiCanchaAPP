@@ -1,42 +1,16 @@
 const db = require("../db");
-
-
-
+const reportPool = require("../dbPool");
 const bcrypt = require("bcryptjs");
-
-
-
 const nodemailer = require("nodemailer");
-
-
-
-
-
 
 
 require("dotenv").config();
 
-
-
-
-
-
-
 // ======================================================
-
-
 
 // UTILIDADES
 
-
-
 // ======================================================
-
-
-
-
-
-
 
 async function query(sql, params = []) {
 
@@ -89,7 +63,10 @@ async function query(sql, params = []) {
 }
 
 
-
+async function reportQuery(sql, params = []) {
+  const [rows] = await reportPool.promise().query(sql, params);
+  return rows;
+}
 
 
 
@@ -6230,230 +6207,190 @@ exports.createAdministrador = async (
 
 // ======================================================
 
-
-
-
-
-
-
 exports.getReportesResumen = async (
   req,
   res
 ) => {
   try {
+    
     // ======================================================
-    // RESERVAS POR MES
-    // ======================================================
-
-    const reservasPorMesRows = await query(`
-      SELECT
-        MONTH(fecha) AS mes,
-        COUNT(*) AS total
-      FROM reserva
-      WHERE YEAR(fecha) = YEAR(CURDATE())
-      GROUP BY MONTH(fecha)
-      ORDER BY MONTH(fecha)
-    `);
-
-    // ======================================================
-    // INGRESOS BRUTOS MENSUALES
-    // ======================================================
-    //
-    // - Solo pagos aprobados.
-    // - Se toma máximo un pago válido por reserva.
-    // - Se usa fecha_validacion.
-    // - Para históricos sin fecha_validacion se usa fecha_pago.
-    // - Se separa presencial y cuenta institucional.
-    //
-    // IMPORTANTE:
-    // Aquí NO descontamos devoluciones todavía.
-    // Esto representa el INGRESO BRUTO.
+    // CONSULTAS DEL REPORTE EN PARALELO
     // ======================================================
 
-    const ingresosMensualesRows = await query(`
-      SELECT
-        MONTH(
+    const [
+      reservasPorMesRows,
+      ingresosMensualesRows,
+      devolucionesMensualesRows,
+      ingresosAnualesRows,
+      devolucionesAnualesRows,
+      horariosRows,
+      usuariosFrecuentesRows,
+      totalReservasRows,
+      totalCanceladasRows,
+      totalPagosRows,
+      pagosAprobadosRows,
+    ] = await Promise.all([
+
+      // RESERVAS POR MES
+      reportQuery(`
+        SELECT
+          MONTH(fecha) AS mes,
+          COUNT(*) AS total
+        FROM reserva
+        WHERE YEAR(fecha) = YEAR(CURDATE())
+        GROUP BY MONTH(fecha)
+        ORDER BY MONTH(fecha)
+      `),
+
+      // INGRESOS BRUTOS MENSUALES
+      reportQuery(`
+        SELECT
+          MONTH(
+            COALESCE(
+              p.fecha_validacion,
+              CAST(p.fecha_pago AS DATETIME)
+            )
+          ) AS mes,
+
+          COALESCE(
+            SUM(
+              CASE
+                WHEN p.metodo = 'presencial'
+                THEN p.monto
+                ELSE 0
+              END
+            ), 0
+          ) AS presencial,
+
+          COALESCE(
+            SUM(
+              CASE
+                WHEN p.metodo = 'comprobante'
+                THEN p.monto
+                ELSE 0
+              END
+            ), 0
+          ) AS comprobante,
+
+          COALESCE(SUM(p.monto), 0) AS total
+
+        FROM pago p
+
+        INNER JOIN (
+          SELECT
+            id_reserva,
+            MAX(id_pago) AS id_pago
+          FROM pago
+          WHERE estado IN (
+            'aprobado',
+            'pagado_presencial'
+          )
+          GROUP BY id_reserva
+        ) pagos_validos
+          ON pagos_validos.id_pago = p.id_pago
+
+        WHERE YEAR(
           COALESCE(
             p.fecha_validacion,
             CAST(p.fecha_pago AS DATETIME)
           )
-        ) AS mes,
+        ) = YEAR(CURDATE())
 
-        COALESCE(
-          SUM(
-            CASE
-              WHEN p.metodo = 'presencial'
-              THEN p.monto
-              ELSE 0
-            END
-          ),
-          0
-        ) AS presencial,
+        GROUP BY
+          MONTH(
+            COALESCE(
+              p.fecha_validacion,
+              CAST(p.fecha_pago AS DATETIME)
+            )
+          )
 
-        COALESCE(
-          SUM(
-            CASE
-              WHEN p.metodo = 'comprobante'
-              THEN p.monto
-              ELSE 0
-            END
-          ),
-          0
-        ) AS comprobante,
+        ORDER BY mes
+      `),
 
-        COALESCE(
-          SUM(p.monto),
-          0
-        ) AS total
-
-      FROM pago p
-
-      INNER JOIN (
+      // DEVOLUCIONES MENSUALES
+      reportQuery(`
         SELECT
-          id_reserva,
-          MAX(id_pago) AS id_pago
-        FROM pago
-        WHERE estado IN (
-          'aprobado',
-          'pagado_presencial'
-        )
-        GROUP BY id_reserva
-      ) pagos_validos
-        ON pagos_validos.id_pago = p.id_pago
+          MONTH(fecha_realizacion) AS mes,
+          COALESCE(SUM(monto), 0) AS total
+        FROM devolucion
+        WHERE estado = 'realizada'
+          AND fecha_realizacion IS NOT NULL
+          AND YEAR(fecha_realizacion) = YEAR(CURDATE())
+        GROUP BY MONTH(fecha_realizacion)
+        ORDER BY mes
+      `),
 
-      WHERE YEAR(
-        COALESCE(
-          p.fecha_validacion,
-          CAST(p.fecha_pago AS DATETIME)
-        )
-      ) = YEAR(CURDATE())
+      // INGRESOS BRUTOS ANUALES
+      reportQuery(`
+        SELECT
+          COALESCE(
+            SUM(
+              CASE
+                WHEN p.metodo = 'presencial'
+                THEN p.monto
+                ELSE 0
+              END
+            ), 0
+          ) AS presencial,
 
-      GROUP BY
-        MONTH(
+          COALESCE(
+            SUM(
+              CASE
+                WHEN p.metodo = 'comprobante'
+                THEN p.monto
+                ELSE 0
+              END
+            ), 0
+          ) AS comprobante,
+
+          COALESCE(SUM(p.monto), 0) AS total
+
+        FROM pago p
+
+        INNER JOIN (
+          SELECT
+            id_reserva,
+            MAX(id_pago) AS id_pago
+          FROM pago
+          WHERE estado IN (
+            'aprobado',
+            'pagado_presencial'
+          )
+          GROUP BY id_reserva
+        ) pagos_validos
+          ON pagos_validos.id_pago = p.id_pago
+
+        WHERE YEAR(
           COALESCE(
             p.fecha_validacion,
             CAST(p.fecha_pago AS DATETIME)
           )
-        )
+        ) = YEAR(CURDATE())
+      `),
 
-      ORDER BY mes
-    `);
-
-    // ======================================================
-    // DEVOLUCIONES REALIZADAS POR MES
-    // ======================================================
-    //
-    // Solo se descuentan cuando:
-    //
-    // estado = 'realizada'
-    //
-    // Se usa fecha_realizacion porque es el momento
-    // en que realmente quedó registrado el reintegro.
-    // ======================================================
-
-    const devolucionesMensualesRows = await query(`
-      SELECT
-        MONTH(fecha_realizacion) AS mes,
-        COALESCE(SUM(monto), 0) AS total
-
-      FROM devolucion
-
-      WHERE estado = 'realizada'
-        AND fecha_realizacion IS NOT NULL
-        AND YEAR(fecha_realizacion) = YEAR(CURDATE())
-
-      GROUP BY MONTH(fecha_realizacion)
-
-      ORDER BY mes
-    `);
-
-    // ======================================================
-    // INGRESOS BRUTOS ANUALES
-    // ======================================================
-
-    const ingresosAnualesRows = await query(`
-      SELECT
-        COALESCE(
-          SUM(
-            CASE
-              WHEN p.metodo = 'presencial'
-              THEN p.monto
-              ELSE 0
-            END
-          ),
-          0
-        ) AS presencial,
-
-        COALESCE(
-          SUM(
-            CASE
-              WHEN p.metodo = 'comprobante'
-              THEN p.monto
-              ELSE 0
-            END
-          ),
-          0
-        ) AS comprobante,
-
-        COALESCE(
-          SUM(p.monto),
-          0
-        ) AS total
-
-      FROM pago p
-
-      INNER JOIN (
+      // DEVOLUCIONES ANUALES
+      reportQuery(`
         SELECT
-          id_reserva,
-          MAX(id_pago) AS id_pago
-        FROM pago
-        WHERE estado IN (
-          'aprobado',
-          'pagado_presencial'
-        )
-        GROUP BY id_reserva
-      ) pagos_validos
-        ON pagos_validos.id_pago = p.id_pago
+          COALESCE(SUM(monto), 0) AS total
+        FROM devolucion
+        WHERE estado = 'realizada'
+          AND fecha_realizacion IS NOT NULL
+          AND YEAR(fecha_realizacion) = YEAR(CURDATE())
+      `),
 
-      WHERE YEAR(
-        COALESCE(
-          p.fecha_validacion,
-          CAST(p.fecha_pago AS DATETIME)
-        )
-      ) = YEAR(CURDATE())
-    `);
+      // HORARIOS MÁS DEMANDADOS
+      reportQuery(`
+        SELECT
+          hora_inicio,
+          COUNT(*) AS total
+        FROM reserva
+        GROUP BY hora_inicio
+        ORDER BY total DESC, hora_inicio ASC
+        LIMIT 5
+      `),
 
-    // ======================================================
-    // DEVOLUCIONES REALIZADAS DEL AÑO
-    // ======================================================
-
-    const devolucionesAnualesRows = await query(`
-      SELECT
-        COALESCE(SUM(monto), 0) AS total
-
-      FROM devolucion
-
-      WHERE estado = 'realizada'
-        AND fecha_realizacion IS NOT NULL
-        AND YEAR(fecha_realizacion) = YEAR(CURDATE())
-    `);
-
-    // ======================================================
-    // OTROS REPORTES EXISTENTES
-    // ======================================================
-
-    const horariosRows = await query(`
-      SELECT
-        hora_inicio,
-        COUNT(*) AS total
-      FROM reserva
-      GROUP BY hora_inicio
-      ORDER BY total DESC, hora_inicio ASC
-      LIMIT 5
-    `);
-
-    const usuariosFrecuentesRows =
-      await query(`
+      // USUARIOS FRECUENTES
+      reportQuery(`
         SELECT
           u.id_usuario,
           u.nombre,
@@ -6469,36 +6406,39 @@ exports.getReportesResumen = async (
           total DESC,
           u.nombre ASC
         LIMIT 5
-      `);
+      `),
 
-    const totalReservasRows =
-      await query(`
+      // TOTAL RESERVAS
+      reportQuery(`
         SELECT COUNT(*) AS total
         FROM reserva
-      `);
+      `),
 
-    const totalCanceladasRows =
-      await query(`
+      // TOTAL CANCELADAS
+      reportQuery(`
         SELECT COUNT(*) AS total
         FROM reserva
         WHERE estado = 'cancelada'
-      `);
+      `),
 
-    const totalPagosRows =
-      await query(`
+      // TOTAL PAGOS
+      reportQuery(`
         SELECT COUNT(*) AS total
         FROM pago
-      `);
+      `),
 
-    const pagosAprobadosRows =
-      await query(`
+      // PAGOS APROBADOS
+      reportQuery(`
         SELECT COUNT(*) AS total
         FROM pago
         WHERE estado IN (
           'aprobado',
           'pagado_presencial'
         )
-      `);
+      `),
+
+    ]);
+
 
     // ======================================================
     // MESES
@@ -6573,13 +6513,13 @@ exports.getReportesResumen = async (
           const presencial =
             Number(
               ingreso?.presencial ||
-                0
+              0
             );
 
           const comprobante =
             Number(
               ingreso?.comprobante ||
-                0
+              0
             );
 
           const total =
@@ -6620,8 +6560,8 @@ exports.getReportesResumen = async (
       horariosRows.map((r) => ({
         hora: r.hora_inicio
           ? String(
-              r.hora_inicio
-            ).slice(0, 5)
+            r.hora_inicio
+          ).slice(0, 5)
           : "-",
 
         total: Number(
@@ -6680,32 +6620,32 @@ exports.getReportesResumen = async (
     const ocupacionPromedio =
       totalReservas > 0
         ? Math.round(
-            (
-              (totalReservas -
-                totalCanceladas) /
-              totalReservas
-            ) * 100
-          )
+          (
+            (totalReservas -
+              totalCanceladas) /
+            totalReservas
+          ) * 100
+        )
         : 0;
 
     const cancelaciones =
       totalReservas > 0
         ? Math.round(
-            (
-              totalCanceladas /
-              totalReservas
-            ) * 100
-          )
+          (
+            totalCanceladas /
+            totalReservas
+          ) * 100
+        )
         : 0;
 
     const pagosAprobadosPct =
       totalPagos > 0
         ? Math.round(
-            (
-              pagosAprobados /
-              totalPagos
-            ) * 100
-          )
+          (
+            pagosAprobados /
+            totalPagos
+          ) * 100
+        )
         : 0;
 
     // ======================================================
