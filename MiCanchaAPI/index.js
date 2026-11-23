@@ -9,12 +9,20 @@ const app = express();
 
 // Direcciones autorizadas para acceder al backend
 
+
 const allowedOrigins = [
   "http://localhost:9002",
   "http://127.0.0.1:9002",
   process.env.FRONTEND_URL,
-  "https://mi-cancha-app-git-prueba-responsive-admin-yeniferlop4-3883.vercel.app"
+
+  // Version anterior de pruebas
+  "https://mi-cancha-app-git-prueba-responsive-admin-yeniferlop4-3883.vercel.app",
+
+  // Nueva version Preview: lighthouse-preview
+  "https://mi-cancha-app-e207oaoeh-yeniferlop4-3883.vercel.app"
+
 ].filter(Boolean).map((origin) => origin.replace(/\/+$/, ""));
+
 
 
 app.use(
