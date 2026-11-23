@@ -19,7 +19,8 @@ const allowedOrigins = [
   "https://mi-cancha-app-git-prueba-responsive-admin-yeniferlop4-3883.vercel.app",
 
   // Nueva version Preview: lighthouse-preview
-  "https://mi-cancha-app-e207oaoeh-yeniferlop4-3883.vercel.app"
+  "https://mi-cancha-app-e207oaoeh-yeniferlop4-3883.vercel.app",
+  "https://mi-cancha-app-git-lighthouse-preview-yeniferlop4-3883.vercel.app"
 
 ].filter(Boolean).map((origin) => origin.replace(/\/+$/, ""));
 
