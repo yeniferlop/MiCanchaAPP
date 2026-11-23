@@ -1,8 +1,15 @@
-import type { Metadata } from 'next';
+
 import './globals.css';
+
+import type { Metadata } from 'next';
 import { SiteHeader } from '@/components/site-header';
 import { Toaster } from "@/components/ui/toaster";
 import { AccessibilityButton } from '@/components/AccessibilityButton';
+
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/600.css";
+import "@fontsource/inter/700.css";
 
 export const metadata: Metadata = {
   title: 'MiCanchaApp',
@@ -16,12 +23,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-      </head>
-      <body className="font-body antialiased min-h-screen flex flex-col">
+      <body
+        className="font-body antialiased min-h-screen flex flex-col"
+        style={{ fontFamily: "'Inter', sans-serif" }}
+      >
         {children}
         <Toaster />
         <AccessibilityButton />
